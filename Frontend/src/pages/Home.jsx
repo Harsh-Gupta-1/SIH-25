@@ -37,38 +37,19 @@ const FRAAtlasLanding = () => {
   const [isSignupLoading, setIsSignupLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [signupError, setSignupError] = useState('');
-  const [user, setUser] = useState(null);
   const [isAuthChecked, setIsAuthChecked] = useState(false);
   const navigate = useNavigate();
 
-  // Check if user is already logged in on component mount
+  // Check if user is logged in and log them out immediately on component mount
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        setIsAuthChecked(true);
-        return;
-      }
-
-      // Set default authorization header
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      const response = await axios.get('/api/auth/me');
-      if (response.data.success) {
-        setUser(response.data.data.user);
-      }
-    } catch (error) {
-      // Token is invalid or expired, remove it
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // Perform logout
       localStorage.removeItem('authToken');
       delete axios.defaults.headers.common['Authorization'];
-    } finally {
-      setIsAuthChecked(true);
     }
-  };
+    setIsAuthChecked(true);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -82,16 +63,13 @@ const FRAAtlasLanding = () => {
       });
 
       if (response.data.success) {
-        const { token, user: userData } = response.data.data;
+        const { token } = response.data.data;
         
         // Store token in localStorage
         localStorage.setItem('authToken', token);
         
         // Set default authorization header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Update user state
-        setUser(userData);
         
         // Close modal and reset form
         setIsLoginOpen(false);
@@ -128,16 +106,13 @@ const FRAAtlasLanding = () => {
       });
 
       if (response.data.success) {
-        const { token, user: userData } = response.data.data;
+        const { token } = response.data.data;
         
         // Store token in localStorage
         localStorage.setItem('authToken', token);
         
         // Set default authorization header
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        
-        // Update user state
-        setUser(userData);
         
         // Close modal and reset form
         setIsSignupOpen(false);
@@ -152,20 +127,6 @@ const FRAAtlasLanding = () => {
     } finally {
       setIsSignupLoading(false);
     }
-  };
-
-  const handleLogout = () => {
-    // Remove token from localStorage
-    localStorage.removeItem('authToken');
-    
-    // Remove authorization header
-    delete axios.defaults.headers.common['Authorization'];
-    
-    // Clear user state
-    setUser(null);
-    
-    // Navigate to home
-    navigate('/');
   };
 
   const features = [
@@ -248,7 +209,7 @@ const FRAAtlasLanding = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-green-600 via-emerald-600 to-teal-600 rounded-lg flex items-center justify-center shadow-lg">
                 <TreePine className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold text-gray-900">FRA Atlas</span>
+              <span className="text-2xl font-bold text-gray-900">VanDarpan</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -260,32 +221,18 @@ const FRAAtlasLanding = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              {user ? (
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">Welcome, {user.name}!</span>
-                  <button 
-                    onClick={handleLogout}
-                    className="text-red-600 hover:text-red-700 font-medium transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button 
-                    onClick={() => setIsLoginOpen(true)}
-                    className="text-teal-600 hover:text-teal-700 font-medium transition-colors"
-                  >
-                    Login
-                  </button>
-                  <button 
-                    onClick={() => setIsSignupOpen(true)}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
+              <button 
+                onClick={() => setIsLoginOpen(true)}
+                className="text-teal-600 hover:text-teal-700 font-medium transition-colors"
+              >
+                Login
+              </button>
+              <button 
+                onClick={() => setIsSignupOpen(true)}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                Sign Up
+              </button>
             </div>
 
             {/* Mobile menu button */}
@@ -308,32 +255,18 @@ const FRAAtlasLanding = () => {
                 <a href="#about" className="text-gray-600 hover:text-green-600 transition-colors">About</a>
                 <a href="#contact" className="text-gray-600 hover:text-green-600 transition-colors">Contact</a>
                 <div className="flex space-x-4 pt-4">
-                  {user ? (
-                    <div className="flex flex-col space-y-2">
-                      <span className="text-gray-700">Welcome, {user.name}!</span>
-                      <button 
-                        onClick={handleLogout}
-                        className="text-red-600 hover:text-red-700 font-medium transition-colors text-left"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <button 
-                        onClick={() => setIsLoginOpen(true)}
-                        className="text-green-600 hover:text-green-700 font-medium transition-colors"
-                      >
-                        Login
-                      </button>
-                      <button 
-                        onClick={() => setIsSignupOpen(true)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-                      >
-                        Sign Up
-                      </button>
-                    </>
-                  )}
+                  <button 
+                    onClick={() => setIsLoginOpen(true)}
+                    className="text-green-600 hover:text-green-700 font-medium transition-colors"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => setIsSignupOpen(true)}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Sign Up
+                  </button>
                 </div>
               </div>
             </div>
@@ -357,21 +290,12 @@ const FRAAtlasLanding = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                {!user ? (
-                  <button 
-                    onClick={() => setIsSignupOpen(true)}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    Get Started Free
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => navigate('/dashboard')}
-                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    Access Dashboard
-                  </button>
-                )}
+                <button 
+                  onClick={() => setIsSignupOpen(true)}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-4 rounded-lg font-medium text-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  Get Started Free
+                </button>
                 <button className="border-2 border-teal-600 text-teal-700 hover:bg-teal-600 hover:text-white px-8 py-4 rounded-lg font-medium text-lg transition-all duration-300">
                   View Demo
                 </button>
@@ -708,21 +632,6 @@ const FRAAtlasLanding = () => {
                     {showSignupPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-              </div>
-
-              <div className="flex items-center">
-                <input 
-                  type="checkbox" 
-                  required
-                  className="rounded border-gray-300 text-green-600 focus:ring-green-500" 
-                  disabled={isSignupLoading}
-                />
-                <span className="ml-2 text-sm text-gray-600">
-                  I agree to the{' '}
-                  <a href="#" className="text-green-600 hover:text-green-700">Terms of Service</a>
-                  {' '}and{' '}
-                  <a href="#" className="text-green-600 hover:text-green-700">Privacy Policy</a>
-                </span>
               </div>
 
               <button

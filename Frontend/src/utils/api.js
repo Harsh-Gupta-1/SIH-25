@@ -77,16 +77,16 @@ export const auth = {
     }
   },
   
-  logout: async () => {
-    try {
-      await api.post('/auth/logout');
-      localStorage.removeItem('token');
-      toast.success('Logged out successfully');
-    } catch (error) {
-      toast.error('Error logging out');
-      throw error;
-    }
-  }
+  // logout: async () => {
+  //   try {
+  //     await api.post('/auth/logout');
+  //     localStorage.removeItem('token');
+  //     toast.success('Logged out successfully');
+  //   } catch (error) {
+  //     toast.error('Error logging out');
+  //     throw error;
+  //   }
+  // }
 };
 
 export const dashboard = {
